@@ -6,3 +6,5 @@
 .idea/
 .vscode/
 web/node_modules
+demo/web/node_modules
+.env
