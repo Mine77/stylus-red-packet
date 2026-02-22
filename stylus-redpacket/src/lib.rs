@@ -37,14 +37,17 @@ sol_storage! {
 }
 
 impl RedPacket {
+    // Owner checks are only valid after initialize has set the owner address.
     fn is_owner(&self) -> bool {
         self.initialized.get() && self.vm().msg_sender() == self.owner.get()
     }
 
+    // Hash the credential ID so we can use it as a fixed-size mapping key.
     fn credential_key(&self, credential_id: &Bytes) -> B256 {
         self.vm().native_keccak256(credential_id.as_ref())
     }
 
+    // Store a deterministic hash of the public key coordinates for later comparison.
     fn pubkey_hash(&self, pubkey_x: B256, pubkey_y: B256) -> B256 {
         let mut data = [0u8; 64];
         data[..32].copy_from_slice(pubkey_x.as_slice());
@@ -65,6 +68,7 @@ impl RedPacket {
             return false;
         }
 
+        // Encode and perform a static call into the external verifier contract.
         let call = verifyCall {
             authenticator_data,
             signed_message_hash,
@@ -76,6 +80,7 @@ impl RedPacket {
 
         let result = unsafe { RawCall::new_static(self.vm()).call(verifier, &data) };
         match result {
+            // Decode the verifier return value, defaulting to false on decode errors.
             Ok(out) => verifyCall::abi_decode_returns(&out).unwrap_or(false),
             Err(_) => false,
         }
@@ -146,6 +151,7 @@ impl RedPacket {
             return false;
         }
 
+        // Verify the WebAuthn assertion against the verifier contract.
         if !self.verify_with_contract(
             authenticator_data,
             signed_message_hash,
@@ -156,12 +162,14 @@ impl RedPacket {
             return false;
         }
 
+        // Only allow each credential to claim once.
         let credential_key = self.credential_key(&credential_id);
         let existing = self.pubkey_hash.get(credential_key);
         if existing != B256::ZERO {
             return false;
         }
 
+        // Persist the credential's public key hash and credit the fixed claim amount.
         let pubkey_hash = self.pubkey_hash(pubkey_x, pubkey_y);
         self.pubkey_hash.insert(credential_key, pubkey_hash);
         let amount = self.claim_amount.get();
@@ -194,6 +202,7 @@ impl RedPacket {
             return false;
         }
 
+        // Ensure the credential is registered and matches the stored public key hash.
         let credential_key = self.credential_key(&credential_id);
         let stored_hash = self.pubkey_hash.get(credential_key);
         if stored_hash == B256::ZERO {
@@ -203,6 +212,7 @@ impl RedPacket {
             return false;
         }
 
+        // Re-verify the WebAuthn assertion before releasing funds.
         if !self.verify_with_contract(
             authenticator_data,
             signed_message_hash,
@@ -218,6 +228,7 @@ impl RedPacket {
             return false;
         }
 
+        // Optimistically zero the balance, then restore if the transfer fails.
         self.balances.insert(credential_key, U256::ZERO);
         if transfer_eth(self.vm(), recipient, balance).is_err() {
             self.balances.insert(credential_key, balance);

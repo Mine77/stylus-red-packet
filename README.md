@@ -1,5 +1,9 @@
 # Stylus Red Packet (Passkey Wallet)
 
+This project showcases how a Rust-based Arbitrum Stylus contract can power a “red packet” (escrow + claim) flow secured by passkeys (WebAuthn). The goal is to give a practical, end-to-end example: on-chain verification logic, a lightweight escrow contract, and a simple web app that ties the flow together.
+
+If you are new to Stylus, this repo is meant to be approachable: the contracts are small, the deployment is scripted, and the frontend demonstrates how a real user would claim or withdraw funds with a passkey.
+
 This repo contains:
 - `stylus-webauthn/` — WebAuthn verifier contract (P-256)
 - `stylus-redpacket/` — escrow contract (balances + withdraw)
