@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Unlocking Smart Contracts with Rust and Arbitrum Stylus</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d1117; /* GitHub Dark Dimmed background */
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        
+        .slide-container {
+            width: 1280px;
+            height: 720px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background-color: #0d1117;
+            overflow: hidden;
+        }
+
+        /* Abstract Grid Background */
+        .grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(48, 54, 61, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(48, 54, 61, 0.3) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* Decorative Glow */
+        .glow-orb {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 1;
+            opacity: 0.15;
+        }
+        
+        .orb-1 {
+            background-color: #28a0f0; /* Arbitrum Blue-ish */
+            top: -200px;
+            right: -100px;
+        }
+        
+        .orb-2 {
+            background-color: #e43717; /* Rust Orange-ish */
+            bottom: -200px;
+            left: -100px;
+        }
+
+        .content-wrapper {
+            z-index: 10;
+            text-align: left;
+            max-width: 1000px;
+            padding: 0 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .mono-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            color: #8b949e;
+            font-size: 1.25rem;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .mono-tag::before {
+            content: '>';
+            color: #e43717; /* Rust Color */
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: -webkit-linear-gradient(0deg, #ffffff, #c9d1d9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            padding-bottom: 10px; /* For descenders */
+        }
+
+        .subtitle {
+            font-size: 2rem;
+            color: #8b949e;
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .divider {
+            height: 4px;
+            width: 80px;
+            background-color: #28a0f0; /* Arbitrum Blue */
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-radius: 2px;
+        }
+
+        .tech-badges {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .tech-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            color: #c9d1d9;
+        }
+        
+        .tech-badge i {
+            font-size: 1.1rem;
+        }
+
+        .rust-icon { color: #dea584; }
+        .stylus-icon { color: #28a0f0; }
+
+        .footer-tagline {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            color: #484f58;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+    </style>
+</head>
+<body>
+<div class="slide-container">
+<!-- Background Elements -->
+<div class="grid-bg"></div>
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
+<!-- Main Content -->
+<div class="content-wrapper">
+<div class="mono-tag">
+<p>cargo stylus new smart_contract</p>
+</div>
+<h1>
+                Unlocking<br/>
+                Smart Contracts with<br/>
+                Rust &amp; Arbitrum Stylus
+            </h1>
+<div class="divider"></div>
+<p class="subtitle">
+                Rust in a Verifiable Execution Environment
+            </p>
+<div class="tech-badges">
+<div class="tech-badge">
+<i class="fa-brands fa-rust rust-icon"></i>
+<p>Rust</p>
+</div>
+<div class="tech-badge">
+<i class="fa-brands fa-ethereum stylus-icon"></i>
+<p>Arbitrum Stylus</p>
+</div>
+<div class="tech-badge">
+<i class="fa-solid fa-code"></i>
+<p>WASM</p>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<div class="footer-tagline">
+<p>Clean engineering, verifiable by design.</p>
+</div>
+</div>
+<!-- slide-scale -->
+<script>
+  (function () {
+    if (window.self !== window.top) return;
+    const slide = document.querySelector(".slide-container");
+    if (!slide) return;
+    const baseWidth = slide.offsetWidth || 1280;
+    const baseHeight = slide.offsetHeight || 720;
+    function applyScale() {
+      const scale = window.innerHeight / baseHeight;
+      const offsetX = (window.innerWidth - baseWidth * scale) / 2;
+      const offsetY = (window.innerHeight - baseHeight * scale) / 2;
+      slide.style.transformOrigin = "top left";
+      slide.style.transform =
+        "translate(" + offsetX + "px, " + offsetY + "px) scale(" + scale + ")";
+    }
+    window.addEventListener("resize", applyScale);
+    applyScale();
+  })();
+</script>
+
+
+</body>
+</html>

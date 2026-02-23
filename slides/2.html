@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>What Are Smart Contracts?</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d1117; /* GitHub Dark Dimmed */
+            color: #c9d1d9;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .slide-container {
+            width: 1280px;
+            height: 720px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: #0d1117;
+            overflow: hidden;
+            padding: 60px 80px;
+            box-sizing: border-box;
+        }
+
+        /* Subtle background decoration (SVG pattern instead of gradient) */
+        .bg-decoration {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm1 1h38v38H1V1z' fill='%23ffffff' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 30px;
+            letter-spacing: -0.02em;
+            border-left: 6px solid #28a0f0; /* Arbitrum Blue */
+            padding-left: 24px;
+            line-height: 1;
+        }
+
+        .comparison-container {
+            display: flex;
+            gap: 40px;
+            flex: 1;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            flex: 1;
+            background-color: #161b22; /* Card bg */
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 16px;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .traditional-icon {
+            background-color: rgba(139, 148, 158, 0.1);
+            color: #8b949e;
+        }
+
+        .verifiable-icon {
+            background-color: rgba(40, 160, 240, 0.1);
+            color: #28a0f0;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            color: #c9d1d9;
+        }
+
+        .feature-item i {
+            margin-top: 4px;
+            font-size: 0.9em;
+        }
+
+        .bullet-dim { color: #484f58; }
+        .bullet-highlight { color: #28a0f0; }
+        .bullet-warn { color: #e43717; }
+
+        .summary-section {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .summary-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .callout-box {
+            background-color: rgba(228, 55, 23, 0.1); /* Rust tint */
+            border: 1px solid rgba(228, 55, 23, 0.3);
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            color: #ff7b72;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Highlighting the verifiable card slightly more */
+        .card.verifiable {
+            border-color: rgba(40, 160, 240, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+<div class="slide-container">
+<div class="bg-decoration"></div>
+<div class="content-wrapper">
+<h1>What Are Smart Contracts?</h1>
+<div class="comparison-container">
+<!-- Traditional Backend -->
+<div class="card">
+<div class="card-header">
+<div class="card-icon traditional-icon">
+<i class="fa-solid fa-server"></i>
+</div>
+<p class="card-title">Traditional Backend</p>
+</div>
+<ul class="feature-list">
+<li class="feature-item">
+<i class="fa-solid fa-user-gear bullet-dim"></i>
+<p>Controlled by one operator</p>
+</li>
+<li class="feature-item">
+<i class="fa-solid fa-eye-slash bullet-dim"></i>
+<p>Execution not externally verifiable</p>
+</li>
+<li class="feature-item">
+<i class="fa-solid fa-database bullet-dim"></i>
+<p>State stored in private database</p>
+</li>
+<li class="feature-item">
+<i class="fa-solid fa-handshake-simple bullet-dim"></i>
+<p>Trust-based guarantees</p>
+</li>
+<li class="feature-item">
+<i class="fa-solid fa-pen-to-square bullet-warn"></i>
+<p>Operator can modify rules</p>
+</li>
+</ul>
+</div>
+<!-- Verifiable Execution -->
+<div class="card verifiable">
+<div class="card-header">
+<div class="card-icon verifiable-icon">
+<i class="fa-brands fa-ethereum"></i>
+</div>
+<p class="card-title">A Verifiable Execution Environment</p>
+</div>
+<ul class="feature-list">
+<li class="feature-item">
+<i class="fa-solid fa-calculator bullet-highlight"></i>
+<p>Deterministic execution</p>
+</li>
+<li class="feature-item">
+<i class="fa-solid fa-globe bullet-highlight"></i>
+<p>Public state transitions</p>
+</li>
+<li class="feature-item">
+<i class="fa-solid fa-key bullet-highlight"></i>
+<p>Cryptographically verifiable</p>
+</li>
+<li class="feature-item">
+<i class="fa-solid fa-scale-balanced bullet-highlight"></i>
+<p>Economically enforced rules</p>
+</li>
+<li class="feature-item">
+<i class="fa-solid fa-shield-halved bullet-highlight"></i>
+<p>No unilateral rule changes</p>
+</li>
+</ul>
+</div>
+</div>
+<!-- Summary Footer -->
+<div class="summary-section">
+<p class="summary-text">
+                    Same business logic. <span style="color: #28a0f0;">Different trust assumptions.</span>
+</p>
+<div class="callout-box">
+<i class="fa-solid fa-triangle-exclamation"></i>
+<p>Smart contracts ≠ tokens. Smart contracts = execution model.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- slide-scale -->
+<script>
+  (function () {
+    if (window.self !== window.top) return;
+    const slide = document.querySelector(".slide-container");
+    if (!slide) return;
+    const baseWidth = slide.offsetWidth || 1280;
+    const baseHeight = slide.offsetHeight || 720;
+    function applyScale() {
+      const scale = window.innerHeight / baseHeight;
+      const offsetX = (window.innerWidth - baseWidth * scale) / 2;
+      const offsetY = (window.innerHeight - baseHeight * scale) / 2;
+      slide.style.transformOrigin = "top left";
+      slide.style.transform =
+        "translate(" + offsetX + "px, " + offsetY + "px) scale(" + scale + ")";
+    }
+    window.addEventListener("resize", applyScale);
+    applyScale();
+  })();
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Escrow State Machine</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .slide-container {
+            width: 1280px;
+            height: 720px;
+            display: flex;
+            flex-direction: column;
+            background-color: #0d1117;
+            overflow: hidden;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Grid Background Pattern */
+        .bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0d1117;
+            background-image: 
+                linear-gradient(rgba(48, 54, 61, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(48, 54, 61, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.02em;
+            z-index: 10;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #8b949e;
+            margin: 0 0 30px 0;
+            z-index: 10;
+        }
+
+        /* Diagram Container */
+        .diagram-wrapper {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            /* Debugging border */
+            /* border: 1px dashed rgba(255,0,0,0.2); */
+        }
+
+        /* SVG Layer for arrows */
+        .svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: visible;
+        }
+
+        /* State Nodes */
+        .state-node {
+            position: absolute;
+            width: 200px;
+            height: 110px;
+            background-color: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .state-label {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .state-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            color: #8b949e;
+        }
+
+        /* 
+           Coordinates Calculation for Alignment:
+           Container: 1160px wide (1280 - 120 pad) x ~450px high
+           
+           Node Dimensions: 200x110
+           Center Y: ~225px
+           
+           Node 1 (Uninitialized): x=50, y=center
+           Node 2 (Funded): x=450, y=center
+           Node 3 (Claimed): x=850, y=top-ish
+           Node 4 (Refunded): x=850, y=bottom-ish
+        */
+
+        .state-uninit {
+            left: 50px;
+            top: 170px;
+            border-color: #8b949e;
+        }
+        
+        .state-funded {
+            left: 480px;
+            top: 170px;
+            border-color: #28a0f0; /* Blue */
+            background-color: rgba(40, 160, 240, 0.1);
+        }
+        .state-funded .state-icon { color: #28a0f0; }
+
+        .state-claimed {
+            left: 910px;
+            top: 50px;
+            border-color: #3fb950; /* Green */
+            background-color: rgba(63, 185, 80, 0.1);
+        }
+        .state-claimed .state-icon { color: #3fb950; }
+
+        .state-refunded {
+            left: 910px;
+            top: 290px;
+            border-color: #d29922; /* Orange */
+            background-color: rgba(210, 153, 34, 0.1);
+        }
+        .state-refunded .state-icon { color: #d29922; }
+
+        /* Transition Labels */
+        .transition-label {
+            position: absolute;
+            background-color: #0d1117;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            z-index: 3;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            white-space: nowrap;
+        }
+
+        .label-desc {
+            display: block;
+            font-size: 0.7rem;
+            color: #8b949e;
+            font-family: 'Inter', sans-serif;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        /* Invariants Box */
+        .invariants-box {
+            margin-top: auto;
+            background-color: rgba(22, 27, 34, 0.8);
+            border: 1px dashed #30363d;
+            border-radius: 8px;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            z-index: 10;
+        }
+
+        .invariant-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #8b949e;
+            font-size: 0.95rem;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .invariant-item i {
+            color: #f85149;
+        }
+
+    </style>
+</head>
+<body style="">
+<div class="slide-container">
+<div class="bg-grid"></div>
+<h1>Self-Claimable Escrow Contract</h1>
+<p class="subtitle">Valid state transitions are enforced by the contract code, not a database administrator.</p>
+<div class="diagram-wrapper">
+<!-- SVG Connecting Lines -->
+<!-- 
+           SVG Coordinate Mapping matches CSS positions + half dimensions:
+           Node 1 Center: x=150 (50+100), y=225 (170+55)
+           Node 2 Center: x=580 (480+100), y=225 (170+55)
+           Node 3 Center: x=1010 (910+100), y=105 (50+55)
+           Node 4 Center: x=1010 (910+100), y=345 (290+55)
+        -->
+<svg class="svg-layer" viewBox="0 0 1160 450">
+<defs>
+<marker id="arrowhead-gray" markerHeight="7" markerWidth="10" orient="auto" refX="9" refY="3.5">
+<polygon fill="#8b949e" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-green" markerHeight="7" markerWidth="10" orient="auto" refX="9" refY="3.5">
+<polygon fill="#3fb950" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+<marker id="arrowhead-orange" markerHeight="7" markerWidth="10" orient="auto" refX="9" refY="3.5">
+<polygon fill="#d29922" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Uninitialized -> Funded (Straight Line) -->
+<!-- From x=250 (Node 1 Right) to x=480 (Node 2 Left) at y=225 -->
+<line marker-end="url(#arrowhead-gray)" stroke="#8b949e" stroke-width="2" x1="250" x2="475" y1="225" y2="225"></line>
+<!-- Funded -> Claimed (Curved Up) -->
+<!-- From x=680 (Node 2 Right) to x=910 (Node 3 Left) -->
+<!-- Start: 680, 225. End: 910, 105. Control points for smooth S-curve -->
+<path d="M 680 225 C 750 225, 780 105, 905 105" fill="none" marker-end="url(#arrowhead-green)" stroke="#3fb950" stroke-dasharray="5,5" stroke-width="2"></path>
+<!-- Funded -> Refunded (Curved Down) -->
+<!-- From x=680 (Node 2 Right) to x=910 (Node 4 Left) -->
+<!-- Start: 680, 225. End: 910, 345 -->
+<path d="M 680 225 C 750 225, 780 345, 905 345" fill="none" marker-end="url(#arrowhead-orange)" stroke="#d29922" stroke-dasharray="5,5" stroke-width="2"></path>
+</svg>
+<!-- Node 1: Uninitialized -->
+<div class="state-node state-uninit">
+<i class="fa-regular fa-circle state-icon"></i>
+<p class="state-label">Uninitialized</p>
+</div>
+<!-- Node 2: Funded -->
+<div class="state-node state-funded">
+<i class="fa-solid fa-lock state-icon"></i>
+<p class="state-label">Funded</p>
+</div>
+<!-- Node 3: Claimed -->
+<div class="state-node state-claimed">
+<i class="fa-solid fa-check-circle state-icon"></i>
+<p class="state-label">Claimed</p>
+</div>
+<!-- Node 4: Refunded -->
+<div class="state-node state-refunded">
+<i class="fa-solid fa-rotate-left state-icon"></i>
+<p class="state-label">Refunded</p>
+</div>
+<!-- Transition Labels -->
+<!-- deposit() - Centered between Node 1 & 2 -->
+<div class="transition-label" style="left: 300px; top: 185px;">
+            deposit()
+            <span class="label-desc">payer sends ETH</span>
+</div>
+<!-- claim() - On top curve -->
+<div class="transition-label" style="left: 730px; top: 110px; border-color: #3fb950; color: #3fb950;">
+            claim()
+            <span class="label-desc">beneficiary signature</span>
+</div>
+<!-- refund() - On bottom curve -->
+<div class="transition-label" style="left: 730px; top: 290px; border-color: #d29922; color: #d29922;">
+            refund()
+            <span class="label-desc">timeout expired</span>
+</div>
+</div>
+<div class="invariants-box">
+<div class="invariant-item">
+<i class="fa-solid fa-ban"></i>
+            No Implicit Transitions
+        </div>
+<div class="invariant-item">
+<i class="fa-solid fa-shield-halved"></i>
+            No Backend Overrides
+        </div>
+<div class="invariant-item">
+<i class="fa-solid fa-code-commit"></i>
+            Rust Type System Enforced
+        </div>
+</div>
+</div>
+
+<!-- slide-scale -->
+<script>
+  (function () {
+    if (window.self !== window.top) return;
+    const slide = document.querySelector(".slide-container");
+    if (!slide) return;
+    const baseWidth = slide.offsetWidth || 1280;
+    const baseHeight = slide.offsetHeight || 720;
+    function applyScale() {
+      const scale = window.innerHeight / baseHeight;
+      const offsetX = (window.innerWidth - baseWidth * scale) / 2;
+      const offsetY = (window.innerHeight - baseHeight * scale) / 2;
+      slide.style.transformOrigin = "top left";
+      slide.style.transform =
+        "translate(" + offsetX + "px, " + offsetY + "px) scale(" + scale + ")";
+    }
+    window.addEventListener("resize", applyScale);
+    applyScale();
+  })();
+</script>
+
+
+</body></html>

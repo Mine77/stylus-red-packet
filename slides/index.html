@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slides Viewer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0f16;
+      --fg: #e6edf3;
+      --muted: #9aa4b2;
+      --accent: #3b82f6;
+      --panel: #0f1623;
+      --border: #1f2937;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      overflow: hidden;
+    }
+
+    #app {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+
+    header .spacer { flex: 1; }
+
+    button {
+      background: #111827;
+      color: var(--fg);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover { border-color: var(--accent); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #page-indicator {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    #page-input {
+      width: 56px;
+      background: #0b1220;
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    #viewer {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #frame-wrap {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform: scale(1);
+      transform-origin: top left;
+      background: #000;
+    }
+
+    #slide-frame {
+      width: 1280px;
+      height: 720px;
+      border: 0;
+      display: block;
+      background: #000;
+    }
+
+
+    #hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    body.fullscreen header {
+      display: none;
+    }
+
+    body.fullscreen #app {
+      grid-template-rows: 1fr;
+    }
+
+    body.fullscreen #viewer {
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <button id="prev-btn" type="button">Prev</button>
+      <button id="next-btn" type="button">Next</button>
+      <span id="page-indicator">1 / 16</span>
+      <input id="page-input" type="number" min="1" step="1" />
+      <button id="go-btn" type="button">Go</button>
+      <button id="scale-btn" type="button">Scale: Fit Height</button>
+      <span id="hint">Keys: ← → ↑ ↓ / PageUp PageDown / Space · Home/End · F fullscreen · S scale</span>
+      <div class="spacer"></div>
+      <button id="fullscreen-btn" type="button">Fullscreen</button>
+    </header>
+
+    <main id="viewer">
+      <div id="frame-wrap">
+        <iframe id="slide-frame" src="1.html" allowfullscreen></iframe>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const SLIDES = Array.from({ length: 16 }, (_, i) => `${i + 1}.html`);
+    const frame = document.getElementById('slide-frame');
+    const wrap = document.getElementById('frame-wrap');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const pageIndicator = document.getElementById('page-indicator');
+    const pageInput = document.getElementById('page-input');
+    const goBtn = document.getElementById('go-btn');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const scaleBtn = document.getElementById('scale-btn');
+
+    const SCALE_MODES = ['fit-height', 'contain', 'cover', 'stretch'];
+    let scaleMode = 'fit-height';
+    let current = 1;
+    let baseWidth = 1280;
+    let baseHeight = 720;
+
+    function clampPage(page) {
+      return Math.max(1, Math.min(SLIDES.length, page));
+    }
+
+    function setPage(page, pushHash = true) {
+      const next = clampPage(page);
+      if (next === current) return;
+      current = next;
+      frame.src = SLIDES[current - 1];
+      updateControls();
+      if (pushHash) {
+        history.replaceState(null, '', `#/${current}`);
+      }
+    }
+
+    function updateControls() {
+      pageIndicator.textContent = `${current} / ${SLIDES.length}`;
+      pageInput.value = current;
+      prevBtn.disabled = current === 1;
+      nextBtn.disabled = current === SLIDES.length;
+    }
+
+    function updateScale() {
+      const viewer = document.getElementById('viewer');
+      const availableWidth = viewer.clientWidth;
+      const availableHeight = viewer.clientHeight;
+      if (!baseWidth || !baseHeight) return;
+      const scaleX = availableWidth / baseWidth;
+      const scaleY = availableHeight / baseHeight;
+      let sx = scaleX;
+      let sy = scaleY;
+
+      if (scaleMode === 'stretch') {
+        sx = scaleX;
+        sy = scaleY;
+      } else if (scaleMode === 'fit-height') {
+        sx = scaleY;
+        sy = scaleY;
+      } else if (scaleMode === 'cover') {
+        const s = Math.max(scaleX, scaleY);
+        sx = s;
+        sy = s;
+      } else {
+        const s = Math.min(scaleX, scaleY);
+        sx = s;
+        sy = s;
+      }
+
+      const scaledWidth = baseWidth * sx;
+      const scaledHeight = baseHeight * sy;
+      wrap.style.left = `${(availableWidth - scaledWidth) / 2}px`;
+      wrap.style.top = `${(availableHeight - scaledHeight) / 2}px`;
+      wrap.style.transform = `scale(${sx}, ${sy})`;
+    }
+
+    function detectSlideSize() {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        const slide = doc.querySelector('.slide-container');
+        const target = slide || doc.documentElement;
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        const width = rect.width || target.scrollWidth;
+        const height = rect.height || target.scrollHeight;
+        if (width && height) {
+          baseWidth = width;
+          baseHeight = height;
+          frame.style.width = `${baseWidth}px`;
+          frame.style.height = `${baseHeight}px`;
+          updateScale();
+        }
+      } catch (err) {
+        // Ignore if cross-origin or not ready.
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    function syncScaleLabel() {
+      const label = scaleMode
+        .split('-')
+        .map((part) => part[0].toUpperCase() + part.slice(1))
+        .join(' ');
+      scaleBtn.textContent = `Scale: ${label}`;
+    }
+
+    function cycleScaleMode() {
+      const index = SCALE_MODES.indexOf(scaleMode);
+      scaleMode = SCALE_MODES[(index + 1) % SCALE_MODES.length];
+      syncScaleLabel();
+      updateScale();
+    }
+
+    function syncFullscreenState() {
+      const isFullscreen = Boolean(document.fullscreenElement);
+      document.body.classList.toggle('fullscreen', isFullscreen);
+      fullscreenBtn.textContent = isFullscreen ? 'Exit Fullscreen' : 'Fullscreen';
+      updateScale();
+    }
+
+    prevBtn.addEventListener('click', () => setPage(current - 1));
+    nextBtn.addEventListener('click', () => setPage(current + 1));
+    goBtn.addEventListener('click', () => setPage(parseInt(pageInput.value, 10) || 1));
+    scaleBtn.addEventListener('click', cycleScaleMode);
+
+    pageInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        setPage(parseInt(pageInput.value, 10) || 1);
+      }
+    });
+
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+
+    function handleKeydown(event, sourceDocument = document) {
+      if (['INPUT', 'TEXTAREA'].includes(sourceDocument.activeElement?.tagName)) {
+        return;
+      }
+      switch (event.key) {
+        case 'ArrowLeft':
+        case 'ArrowUp':
+        case 'PageUp':
+          event.preventDefault();
+          setPage(current - 1);
+          break;
+        case 'ArrowRight':
+        case 'ArrowDown':
+        case 'PageDown':
+        case ' ': // space
+          event.preventDefault();
+          setPage(current + 1);
+          break;
+        case 'Home':
+          event.preventDefault();
+          setPage(1);
+          break;
+        case 'End':
+          event.preventDefault();
+          setPage(SLIDES.length);
+          break;
+        case 'f':
+        case 'F':
+          event.preventDefault();
+          toggleFullscreen();
+          break;
+        case 's':
+        case 'S':
+          event.preventDefault();
+          cycleScaleMode();
+          break;
+        default:
+          break;
+      }
+    }
+
+    window.addEventListener('keydown', (event) => handleKeydown(event, document));
+
+    window.addEventListener('resize', updateScale);
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    function attachFrameKeyHandler() {
+      try {
+        const doc = frame.contentDocument;
+        const win = frame.contentWindow;
+        if (!doc || !win) return;
+        doc.addEventListener('keydown', (event) => handleKeydown(event, doc));
+        win.addEventListener('keydown', (event) => handleKeydown(event, doc));
+      } catch (err) {
+        // Ignore if cross-origin.
+      }
+    }
+
+    frame.addEventListener('load', () => {
+      detectSlideSize();
+      updateScale();
+      attachFrameKeyHandler();
+    });
+
+    function readHash() {
+      const match = location.hash.match(/#\/(\d+)/);
+      if (!match) return null;
+      return parseInt(match[1], 10);
+    }
+
+    window.addEventListener('hashchange', () => {
+      const page = readHash();
+      if (page) setPage(page, false);
+    });
+
+    const initial = readHash() || 1;
+    current = clampPage(initial);
+    frame.src = SLIDES[current - 1];
+    updateControls();
+    updateScale();
+    syncFullscreenState();
+    syncScaleLabel();
+  </script>
+</body>
+</html>

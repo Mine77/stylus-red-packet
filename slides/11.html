@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Escrow Contract — Code</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .slide-container {
+            width: 1280px;
+            height: 720px;
+            display: flex;
+            flex-direction: column;
+            background-color: #0d1117;
+            overflow: hidden;
+            padding: 40px 60px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Background Pattern */
+        .bg-pattern {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 40%;
+            height: 60%;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2328a0f0' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Header Area */
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            z-index: 10;
+        }
+
+        .title-group {
+            flex: 1;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 5px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #8b949e;
+            margin: 0 0 20px 0;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Github Link Button */
+        .github-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #21262d;
+            color: #e6edf3;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            margin-top: 5px;
+        }
+
+        .github-link:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+            color: #ffffff;
+        }
+
+        /* Code Window Container */
+        .code-window {
+            flex: 1;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            z-index: 10;
+            margin-bottom: 25px;
+            min-height: 0;
+        }
+
+        /* Window Header */
+        .window-header {
+            background-color: #0d1117;
+            border-bottom: 1px solid #30363d;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background-color: #ff5f56; }
+        .dot-yellow { background-color: #ffbd2e; }
+        .dot-green { background-color: #27c93f; }
+
+        .file-tab {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            background-color: #161b22;
+            padding: 4px 12px;
+            border-radius: 4px;
+            border: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Code Content */
+        .code-content {
+            padding: 20px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #e6edf3;
+            display: flex;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        .code-content::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        .code-content::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        .code-content::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 5px;
+            border: 2px solid #0d1117;
+        }
+        .code-content::-webkit-scrollbar-thumb:hover {
+            background: #8b949e;
+        }
+
+        .line-numbers {
+            color: #484f58;
+            text-align: right;
+            padding-right: 20px;
+            user-select: none;
+            border-right: 1px solid #30363d;
+            margin-right: 20px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            height: fit-content;
+        }
+
+        .code-lines {
+            flex: 1;
+            height: fit-content;
+        }
+
+        /* Syntax Highlighting */
+        .k { color: #ff7b72; } /* Keyword */
+        .t { color: #79c0ff; } /* Type */
+        .f { color: #d2a8ff; } /* Function */
+        .c { color: #8b949e; font-style: italic; } /* Comment */
+        .s { color: #a5d6ff; } /* String */
+        .n { color: #79c0ff; } /* Number */
+        .m { color: #e3b341; } /* Macro */
+        .o { color: #ff7b72; } /* Operator */
+        .v { color: #ffa657; } /* Enum Variant */
+
+        /* Highlights Bar */
+        .highlights-bar {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            z-index: 10;
+            flex-shrink: 0;
+            height: 100px;
+        }
+
+        .highlight-item {
+            flex: 1;
+            background-color: rgba(22, 27, 34, 0.8);
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s;
+        }
+
+        .highlight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .icon-rust { background-color: rgba(228, 55, 23, 0.1); color: #e43717; border: 1px solid rgba(228, 55, 23, 0.2); }
+        .icon-safe { background-color: rgba(63, 185, 80, 0.1); color: #3fb950; border: 1px solid rgba(63, 185, 80, 0.2); }
+        .icon-logic { background-color: rgba(40, 160, 240, 0.1); color: #28a0f0; border: 1px solid rgba(40, 160, 240, 0.2); }
+
+        .highlight-text h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .highlight-text p {
+            margin: 2px 0 0 0;
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+<div class="slide-container">
+<div class="bg-pattern"></div>
+<div class="header-area">
+<div class="title-group">
+<h1>Escrow Contract — Code</h1>
+<p class="subtitle">&gt; src/lib.rs</p>
+</div>
+<a class="github-link" href="https://github.com/Mine77/stylus-red-packet/tree/main/stylus-escrow" target="_blank">
+<i class="fa-brands fa-github"></i> View on GitHub
+        </a>
+</div>
+<!-- Code Window -->
+<div class="code-window">
+<div class="window-header">
+<div class="window-controls">
+<div class="control-dot dot-red"></div>
+<div class="control-dot dot-yellow"></div>
+<div class="control-dot dot-green"></div>
+</div>
+<div class="file-tab">
+<i class="fa-brands fa-rust" style="color: #e43717;"></i> lib.rs
+            </div>
+</div>
+<div class="code-content">
+<div class="line-numbers">
+                1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9<br/>10<br/>11<br/>12<br/>13<br/>14<br/>15<br/>16<br/>17<br/>18<br/>19<br/>20<br/>21<br/>22<br/>23<br/>24<br/>25<br/>26<br/>27<br/>28<br/>29<br/>30<br/>31<br/>32<br/>33<br/>34<br/>35<br/>36<br/>37<br/>38<br/>39<br/>40<br/>41<br/>42<br/>43<br/>44<br/>45<br/>46<br/>47
+            </div>
+<div class="code-lines">
+<span class="m">sol_storage!</span> { <br/>
+                  <span class="c">/// Persistent storage state</span><br/>
+                  <span class="m">#[entrypoint]</span><br/>
+                  <span class="k">pub struct</span> <span class="t">Escrow</span> {<br/>
+                    address owner;<br/>
+                    address verifier; <span class="c">// WebAuthn verifier contract</span><br/>
+                    uint256 claim_amount;<br/>
+                    mapping(bytes32 =&gt; bytes32) pubkey_hash; <span class="c">// Prevents replay</span><br/>
+                    mapping(bytes32 =&gt; uint256) balances;    <span class="c">// Ledger</span><br/>
+                  }<br/>
+                }<br/>
+<br/>
+<span class="m">#[public]</span><br/>
+<span class="k">impl</span> <span class="t">Escrow</span> {<br/>
+                  <span class="c">/// Initialize contract with WebAuthn verifier and claim amount</span><br/>
+                  <span class="k">pub fn</span> <span class="f">initialize</span>(&amp;<span class="k">mut self</span>, verifier: <span class="t">Address</span>, amount: <span class="t">U256</span>) -&gt; <span class="t">bool</span> {<br/>
+                    <span class="k">if</span> <span class="k">self</span>.initialized.<span class="f">get</span>() { <span class="k">return</span> <span class="n">false</span>; }<br/>
+                    <span class="k">self</span>.verifier.<span class="f">set</span>(verifier);<br/>
+                    <span class="k">self</span>.claim_amount.<span class="f">set</span>(amount);<br/>
+                    <span class="k">self</span>.initialized.<span class="f">set</span>(<span class="n">true</span>);<br/>
+                    <span class="n">true</span><br/>
+                  }<br/>
+<br/>
+                  <span class="c">/// Claim funds by verifying a passkey assertion (One-Time Claim)</span><br/>
+                  <span class="k">pub fn</span> <span class="f">claim</span>(&amp;<span class="k">mut self</span>, id: <span class="t">Bytes</span>, auth: <span class="t">Bytes</span>, sig: <span class="t">Bytes</span>, ... ) -&gt; <span class="t">bool</span> {<br/>
+                    <span class="c">// 1. Call external WebAuthn verifier contract to validate signature</span><br/>
+                    <span class="k">if</span> !<span class="k">self</span>.<span class="f">verify_with_contract</span>(auth, sig, ...) { <span class="k">return</span> <span class="n">false</span>; }<br/>
+<br/>
+                    <span class="c">// 2. Ensure this passkey hasn't claimed before (Sybil Resistance)</span><br/>
+                    <span class="k">let</span> key = <span class="k">self</span>.<span class="f">credential_key</span>(&amp;id);<br/>
+                    <span class="k">if</span> <span class="k">self</span>.pubkey_hash.<span class="f">get</span>(key) != <span class="t">B256</span>::<span class="v">ZERO</span> { <span class="k">return</span> <span class="n">false</span>; }<br/>
+<br/>
+                    <span class="c">// 3. Mark as used and credit balance</span><br/>
+                    <span class="k">self</span>.pubkey_hash.<span class="f">insert</span>(key, ...);<br/>
+                    <span class="k">self</span>.balances.<span class="f">insert</span>(key, <span class="k">self</span>.claim_amount.<span class="f">get</span>());<br/>
+                    <span class="n">true</span><br/>
+                  }<br/>
+<br/>
+                  <span class="c">/// Withdraw funds to a recipient address</span><br/>
+                  <span class="k">pub fn</span> <span class="f">withdraw</span>(&amp;<span class="k">mut self</span>, id: <span class="t">Bytes</span>, recipient: <span class="t">Address</span>, ...) -&gt; <span class="t">bool</span> {<br/>
+                    <span class="c">// 1. Re-verify ownership via Passkey</span><br/>
+                    <span class="k">if</span> !<span class="k">self</span>.<span class="f">verify_with_contract</span>(...) { <span class="k">return</span> <span class="n">false</span>; }<br/>
+<br/>
+                    <span class="c">// 2. Check balance and transfer ETH via Stylus SDK</span><br/>
+                    <span class="k">let</span> key = <span class="k">self</span>.<span class="f">credential_key</span>(&amp;id);<br/>
+                    <span class="k">let</span> bal = <span class="k">self</span>.balances.<span class="f">get</span>(key);<br/>
+                    <span class="k">self</span>.balances.<span class="f">insert</span>(key, <span class="t">U256</span>::<span class="v">ZERO</span>); <span class="c">// Optimistic update</span><br/>
+<br/>
+                    <span class="k">if</span> <span class="f">transfer_eth</span>(<span class="k">self</span>.<span class="f">vm</span>(), recipient, bal).<span class="f">is_err</span>() {<br/>
+                      <span class="k">self</span>.balances.<span class="f">insert</span>(key, bal); <span class="c">// Revert on failure</span><br/>
+                      <span class="k">return</span> <span class="n">false</span>;<br/>
+                    }<br/>
+                    <span class="n">true</span><br/>
+                  }<br/>
+                }
+            </div>
+</div>
+</div>
+<!-- Highlights Bar -->
+<div class="highlights-bar">
+<!-- Highlight 1: Composability -->
+<div class="highlight-item">
+<div class="highlight-icon icon-logic">
+<i class="fa-solid fa-puzzle-piece"></i>
+</div>
+<div class="highlight-text">
+<h3>Composability</h3>
+<p>Delegates WebAuthn logic to external verifier.</p>
+</div>
+</div>
+<!-- Highlight 2: Sybil Resistance -->
+<div class="highlight-item">
+<div class="highlight-icon icon-safe">
+<i class="fa-solid fa-fingerprint"></i>
+</div>
+<div class="highlight-text">
+<h3>Sybil Resistance</h3>
+<p>One-time claim enforced per passkey credential.</p>
+</div>
+</div>
+<!-- Highlight 3: Native ETH -->
+<div class="highlight-item">
+<div class="highlight-icon icon-rust">
+<i class="fa-brands fa-ethereum"></i>
+</div>
+<div class="highlight-text">
+<h3>Native ETH Transfer</h3>
+<p>Direct ETH transfers via Stylus SDK methods.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- slide-scale -->
+<script>
+  (function () {
+    if (window.self !== window.top) return;
+    const slide = document.querySelector(".slide-container");
+    if (!slide) return;
+    const baseWidth = slide.offsetWidth || 1280;
+    const baseHeight = slide.offsetHeight || 720;
+    function applyScale() {
+      const scale = window.innerHeight / baseHeight;
+      const offsetX = (window.innerWidth - baseWidth * scale) / 2;
+      const offsetY = (window.innerHeight - baseHeight * scale) / 2;
+      slide.style.transformOrigin = "top left";
+      slide.style.transform =
+        "translate(" + offsetX + "px, " + offsetY + "px) scale(" + scale + ")";
+    }
+    window.addEventListener("resize", applyScale);
+    applyScale();
+  })();
+</script>
+
+
+</body>
+</html>
