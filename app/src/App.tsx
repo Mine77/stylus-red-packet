@@ -1,15 +1,22 @@
 import confetti from "canvas-confetti";
 import { Coins, LogOut, RefreshCw, Sparkles, Wallet } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toHex } from "./lib/encoding";
 import {
-  buildClaimPayload,
   clearCachedCredential,
+  buildAssertionPayload,
   getCachedCredential,
+  registerPasskey,
 } from "./lib/webauthn";
 
 type Page = "envelope" | "result";
+type ToastTone = "info" | "success" | "warning" | "error";
+type Toast = {
+  id: string;
+  message: string;
+  tone: ToastTone;
+};
 
 const SESSION_KEY = "red-packet-session";
 const BALANCE_KEY = "red-packet-balance";
@@ -25,15 +32,39 @@ const getRpId = () => {
   return "";
 };
 
+const TOAST_STYLES: Record<ToastTone, string> = {
+  info: "bg-stone-900 text-white",
+  success: "bg-emerald-600 text-white",
+  warning: "bg-amber-400 text-stone-900",
+  error: "bg-red-600 text-white",
+};
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("envelope");
-  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [balance, setBalance] = useState("0");
   const [isOpening, setIsOpening] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const toastIdRef = useRef(0);
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  }, []);
+
+  const pushToast = useCallback(
+    (message: string, tone: ToastTone = "info", duration = 3500) => {
+      if (!message) {
+        return;
+      }
+      const id = `${Date.now()}-${toastIdRef.current++}`;
+      setToasts((prev) => [...prev, { id, message, tone }]);
+      window.setTimeout(() => dismissToast(id), duration);
+    },
+    [dismissToast],
+  );
 
   useEffect(() => {
     if (typeof localStorage === "undefined") {
@@ -139,16 +170,26 @@ export default function App() {
 
   const handleLogin = async (): Promise<boolean> => {
     if (!window.PublicKeyCredential) {
-      setStatus("This browser does not support Passkey/WebAuthn.");
+      const message = "This browser does not support Passkey/WebAuthn.";
+      pushToast(message, "error");
       return false;
     }
 
     setLoading(true);
-    setStatus("Signing in with passkey...\n");
+    pushToast("Signing in with passkey...", "info");
 
     try {
       const rpId = getRpId();
-      const payload = await buildClaimPayload(rpId);
+      const cachedCredential = getCachedCredential();
+      if (!cachedCredential) {
+        pushToast("Creating passkey...", "info");
+        await registerPasskey(rpId);
+        const message = "Passkey created. Tap Open again to claim.";
+        pushToast(message, "success", 5000);
+        return false;
+      }
+
+      const payload = await buildAssertionPayload(rpId);
 
       const claimResponse = await fetch("/api/claim", {
         method: "POST",
@@ -178,14 +219,26 @@ export default function App() {
       setLoggedIn(true);
       persistSession(true, nextBalance);
 
-      const statusText = claimNotice
-        ? `Signed in.\n${claimNotice}\nBalance: ${nextBalance}`
-        : `Signed in.\nBalance: ${nextBalance}`;
-      setStatus(statusText);
+      if (claimNotice) {
+        if (claimNotice.toLowerCase().includes("already claimed")) {
+          pushToast("You already claimed this packet.", "warning", 5000);
+        } else {
+          pushToast(claimNotice, "warning", 5000);
+        }
+      } else {
+        pushToast(`Signed in. Balance: ${nextBalance}`, "success");
+      }
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      setStatus(`Sign-in failed: ${message}`);
+      if (message === "Failed to fetch passkey assertion.") {
+        clearCachedCredential();
+        const notice = "Passkey not available. Tap Open to create a new one.";
+        pushToast(notice, "warning", 5000);
+        return false;
+      }
+      const notice = `Sign-in failed: ${message}`;
+      pushToast(notice, "error", 5000);
       return false;
     } finally {
       setLoading(false);
@@ -208,34 +261,38 @@ export default function App() {
   const handleLogout = () => {
     setLoggedIn(false);
     setBalance("0");
-    setStatus("Logged out.");
+    const message = "Logged out.";
+    pushToast(message, "info");
     persistSession(false);
-    clearCachedCredential();
     setCurrentPage("envelope");
   };
 
   const handleRefreshBalance = async () => {
     if (!window.PublicKeyCredential) {
-      setStatus("This browser does not support Passkey/WebAuthn.");
+      const message = "This browser does not support Passkey/WebAuthn.";
+      pushToast(message, "error");
       return;
     }
     const cachedCredential = getCachedCredential();
     if (!cachedCredential) {
-      setStatus("Please sign in first.");
+      const message = "Please sign in first.";
+      pushToast(message, "warning");
       return;
     }
 
     setRefreshing(true);
-    setStatus("Refreshing balance...\n");
+    pushToast("Refreshing balance...", "info");
 
     try {
       const nextBalance = await fetchBalance(cachedCredential);
       setBalance(nextBalance);
       persistSession(true, nextBalance);
-      setStatus(`Balance updated: ${nextBalance}`);
+      const message = `Balance updated: ${nextBalance}`;
+      pushToast(message, "success");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      setStatus(`Balance refresh failed: ${message}`);
+      const notice = `Balance refresh failed: ${message}`;
+      pushToast(notice, "error", 5000);
     } finally {
       setRefreshing(false);
     }
@@ -243,24 +300,34 @@ export default function App() {
 
   const handleWithdraw = async (recipient: string): Promise<boolean> => {
     if (!window.PublicKeyCredential) {
-      setStatus("This browser does not support Passkey/WebAuthn.");
+      const message = "This browser does not support Passkey/WebAuthn.";
+      pushToast(message, "error");
       return false;
     }
     if (!loggedIn) {
-      setStatus("Please sign in first.");
+      const message = "Please sign in first.";
+      pushToast(message, "warning");
       return false;
     }
     if (!recipient.trim()) {
-      setStatus("Please enter a recipient address.");
+      const message = "Please enter a recipient address.";
+      pushToast(message, "warning");
       return false;
     }
 
     setWithdrawing(true);
-    setStatus("Creating passkey and signing...\n");
+    pushToast("Signing with passkey...", "info");
 
     try {
       const rpId = getRpId();
-      const payload = await buildClaimPayload(rpId);
+      const cachedCredential = getCachedCredential();
+      if (!cachedCredential) {
+        const message = "Please open the packet once to create a passkey first.";
+        pushToast(message, "warning");
+        return false;
+      }
+
+      const payload = await buildAssertionPayload(rpId);
 
       const response = await fetch("/api/withdraw", {
         method: "POST",
@@ -286,13 +353,17 @@ export default function App() {
       const nextBalance = await fetchBalance(payload);
       setBalance(nextBalance);
       persistSession(true, nextBalance);
-      setStatus(
-        `Withdrawn successfully!\nTx hash: ${data.txHash ?? "-"}\nBalance: ${nextBalance}`,
+      const txHash = data?.txHash ?? "-";
+      pushToast(
+        `Withdrawn successfully! Tx: ${txHash} Balance: ${nextBalance}`,
+        "success",
+        6000,
       );
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      setStatus(`Withdraw failed: ${message}`);
+      const notice = `Withdraw failed: ${message}`;
+      pushToast(notice, "error", 5000);
       return false;
     } finally {
       setWithdrawing(false);
@@ -301,13 +372,35 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4 font-sans overflow-hidden">
+      <div className="fixed top-4 left-1/2 z-50 w-full max-w-md -translate-x-1/2 px-4 pointer-events-none">
+        <AnimatePresence>
+          {toasts.map((toast) => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className={`mb-2 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium shadow-lg pointer-events-auto ${TOAST_STYLES[toast.tone]}`}
+            >
+              <span className="flex-1">{toast.message}</span>
+              <button
+                type="button"
+                onClick={() => dismissToast(toast.id)}
+                className="rounded-md px-2 py-1 text-xs font-semibold uppercase opacity-80 hover:opacity-100"
+              >
+                Close
+              </button>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
       <AnimatePresence mode="wait">
         {currentPage === "envelope" ? (
           <EnvelopePage
             key="envelope"
             onOpen={handleOpen}
             isOpening={isOpening || loading}
-            status={status}
           />
         ) : (
           <ResultPage
@@ -318,7 +411,6 @@ export default function App() {
             refreshing={refreshing}
             onWithdraw={handleWithdraw}
             withdrawing={withdrawing}
-            status={status}
           />
         )}
       </AnimatePresence>
@@ -329,11 +421,9 @@ export default function App() {
 function EnvelopePage({
   onOpen,
   isOpening,
-  status,
 }: {
   onOpen: () => void;
   isOpening: boolean;
-  status: string;
   key?: string;
 }) {
   return (
@@ -383,12 +473,6 @@ function EnvelopePage({
         </p>
       </div>
 
-      {status ? (
-        <div className="z-10 w-full bg-red-800/30 border border-red-700/40 text-red-50 text-xs rounded-xl px-4 py-3 whitespace-pre-wrap">
-          {status}
-        </div>
-      ) : null}
-
       <div className="absolute bottom-0 left-0 w-full h-12 bg-red-800/20" />
     </motion.div>
   );
@@ -401,7 +485,6 @@ function ResultPage({
   refreshing,
   onWithdraw,
   withdrawing,
-  status,
 }: {
   amount: string;
   onLogout: () => void;
@@ -409,7 +492,6 @@ function ResultPage({
   refreshing: boolean;
   onWithdraw: (recipient: string) => Promise<boolean>;
   withdrawing: boolean;
-  status: string;
   key?: string;
 }) {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
@@ -582,12 +664,6 @@ function ResultPage({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {status ? (
-        <div className="mt-6 w-full bg-stone-50 border border-stone-200 text-stone-600 text-xs rounded-2xl px-4 py-3 whitespace-pre-wrap">
-          {status}
-        </div>
-      ) : null}
 
       <div className="mt-6 flex items-center gap-2 text-stone-300">
         <Coins className="w-4 h-4" />

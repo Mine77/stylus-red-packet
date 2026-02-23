@@ -306,27 +306,32 @@ async function getAssertion(rpId: string, credentialId: Bytes): Promise<Assertio
   };
 }
 
-export async function buildClaimPayload(rpId: string): Promise<ClaimPayload> {
+export async function registerPasskey(rpId: string): Promise<CachedCredential> {
   if (!rpId) {
     throw new Error("Missing RP ID.");
   }
 
-  let stored = getStoredCredential();
+  const stored = await createPasskey(rpId);
+  setStoredCredential(stored);
+  return {
+    credentialId: fromBase64Url(stored.id),
+    publicKeyX: fromBase64Url(stored.publicKeyX),
+    publicKeyY: fromBase64Url(stored.publicKeyY),
+  };
+}
+
+export async function buildAssertionPayload(rpId: string): Promise<ClaimPayload> {
+  if (!rpId) {
+    throw new Error("Missing RP ID.");
+  }
+
+  const stored = getStoredCredential();
   if (!stored) {
-    stored = await createPasskey(rpId);
-    setStoredCredential(stored);
+    throw new Error("Passkey not found. Create one first.");
   }
 
   const credentialId = fromBase64Url(stored.id);
-  let assertion: AssertionData | undefined;
-  try {
-    assertion = await getAssertion(rpId, credentialId);
-  } catch {
-    stored = await createPasskey(rpId);
-    setStoredCredential(stored);
-    const refreshedId = fromBase64Url(stored.id);
-    assertion = await getAssertion(rpId, refreshedId);
-  }
+  const assertion = await getAssertion(rpId, credentialId);
   const clientDataHash = await sha256(assertion.clientDataJSON);
   const signedMessageHash = await sha256(
     concatBytes(assertion.authenticatorData, clientDataHash),
