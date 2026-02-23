@@ -1715,7 +1715,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "stylus-redpacket"
+name = "stylus-escrow"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",

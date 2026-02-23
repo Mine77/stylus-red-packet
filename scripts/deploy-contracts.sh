@@ -139,8 +139,8 @@ cast send "${VERIFIER_ADDRESS}" \
   "initialize(bytes32)" "${RP_ID_HASH}" \
   --private-key "${DEPLOYER_PRIVATE_KEY}" --rpc-url "${RPC_URL}"
 
-echo "Deploying escrow (stylus-redpacket)..."
-deploy_contract "${ROOT_DIR}/stylus-redpacket" || exit 1
+echo "Deploying escrow (stylus-escrow)..."
+deploy_contract "${ROOT_DIR}/stylus-escrow" || exit 1
 ESCROW_ADDRESS="${DEPLOYED_ADDRESS}"
 echo "Escrow address: ${ESCROW_ADDRESS}"
 

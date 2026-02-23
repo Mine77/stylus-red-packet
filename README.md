@@ -6,7 +6,7 @@ If you are new to Stylus, this repo is meant to be approachable: the contracts a
 
 This repo contains:
 - `stylus-webauthn/` — WebAuthn verifier contract (P-256)
-- `stylus-redpacket/` — escrow contract (balances + withdraw)
+- `stylus-escrow/` — escrow contract (balances + withdraw)
 - `app/` — Vite + React frontend + Vercel Edge API
 
 ## Prerequisites
@@ -42,7 +42,7 @@ Run:
 This will:
 - deploy `stylus-webauthn`
 - initialize it with `RP_ID_HASH`
-- deploy `stylus-redpacket`
+- deploy `stylus-escrow`
 - initialize it with the verifier address + claim amount
 - fund the escrow from the deployer key
 - write `app/.env.local`

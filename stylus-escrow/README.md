@@ -1,4 +1,4 @@
-# Stylus Red Packet Escrow Contract
+# Stylus Escrow Contract
 
 A minimal escrow contract that stores balances per passkey credential and
 delegates WebAuthn verification to a separate verifier contract.

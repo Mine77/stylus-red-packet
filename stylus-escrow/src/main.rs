@@ -6,5 +6,5 @@ pub extern "C" fn main() {}
 
 #[cfg(feature = "export-abi")]
 fn main() {
-    stylus_redpacket::print_from_args();
+    stylus_escrow::print_from_args();
 }

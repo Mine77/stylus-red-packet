@@ -1,4 +1,4 @@
-//! Stylus Red Packet (Passkey) escrow contract.
+//! Stylus Escrow (Passkey) contract.
 //!
 //! This contract stores balances keyed by passkey credential ID and delegates
 //! WebAuthn verification to a separate verifier contract.
@@ -18,9 +18,9 @@ sol! {
 }
 
 sol_storage! {
-    /// Persistent storage for the Red Packet escrow contract.
+    /// Persistent storage for the escrow contract.
     #[entrypoint]
-    pub struct RedPacket {
+    pub struct Escrow {
         /// The address that can update configuration.
         address owner;
         /// Whether the contract has been initialized.
@@ -36,7 +36,7 @@ sol_storage! {
     }
 }
 
-impl RedPacket {
+impl Escrow {
     // Owner checks are only valid after initialize has set the owner address.
     fn is_owner(&self) -> bool {
         self.initialized.get() && self.vm().msg_sender() == self.owner.get()
@@ -88,7 +88,7 @@ impl RedPacket {
 }
 
 #[public]
-impl RedPacket {
+impl Escrow {
     #[receive]
     fn receive(&mut self) -> Result<(), Vec<u8>> {
         Ok(())
@@ -131,7 +131,7 @@ impl RedPacket {
         true
     }
 
-    /// Claims a red packet by verifying a WebAuthn assertion.
+    /// Claims the escrowed amount by verifying a WebAuthn assertion.
     ///
     /// `signed_message_hash` must be SHA-256(authenticator_data || client_data_hash),
     /// computed off-chain to keep the escrow contract small.
