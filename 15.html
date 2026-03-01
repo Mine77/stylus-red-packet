@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>What This Enables</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
-<style>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>What This Enables</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
         body {
             margin: 0;
             padding: 0;
@@ -25,7 +28,7 @@
             flex-direction: column;
             background-color: #0d1117;
             overflow: hidden;
-            padding: 40px 60px; /* Reduced padding */
+            padding: 40px 60px;
             box-sizing: border-box;
             position: relative;
         }
@@ -65,7 +68,7 @@
         }
 
         h1 {
-            font-size: 2.5rem; /* Reduced font size */
+            font-size: 2.5rem;
             font-weight: 800;
             color: #ffffff;
             margin: 0 0 8px 0;
@@ -75,13 +78,13 @@
         .subtitle {
             font-size: 1.1rem;
             color: #8b949e;
-            margin: 0 0 30px 0; /* Reduced margin */
+            margin: 0 0 30px 0;
             max-width: 800px;
         }
 
         .lists-container {
             display: flex;
-            gap: 40px; /* Reduced gap */
+            gap: 40px;
             flex: 1;
         }
 
@@ -96,15 +99,15 @@
             display: flex;
             align-items: center;
             gap: 14px;
-            margin-bottom: 20px; /* Reduced margin */
-            padding-bottom: 12px; /* Reduced padding */
+            margin-bottom: 20px;
+            padding-bottom: 12px;
             border-bottom: 2px solid #30363d;
         }
 
         .section-icon {
-            font-size: 1.6rem; /* Slightly reduced */
-            width: 42px; /* Reduced width */
-            height: 42px; /* Reduced height */
+            font-size: 1.6rem;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -114,10 +117,19 @@
         }
 
         .title-text {
-            font-size: 1.3rem; /* Slightly reduced */
+            font-size: 1.25rem;
             font-weight: 700;
             color: #ffffff;
             margin: 0;
+            line-height: 1.2;
+        }
+
+        .title-sub {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #8b949e;
+            display: block;
+            margin-top: 2px;
         }
 
         /* Bullet Styles */
@@ -127,15 +139,15 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 16px; /* Reduced gap */
+            gap: 16px;
         }
 
         .list-item {
             display: flex;
             align-items: flex-start;
-            gap: 16px; /* Reduced gap */
+            gap: 16px;
             background-color: rgba(22, 27, 34, 0.5);
-            padding: 14px; /* Reduced padding */
+            padding: 14px;
             border-radius: 8px;
             border: 1px solid transparent;
             transition: all 0.2s ease;
@@ -149,7 +161,7 @@
 
         .item-icon {
             margin-top: 2px;
-            font-size: 1.0rem; /* Slightly reduced */
+            font-size: 1.0rem;
             width: 20px;
             display: flex;
             justify-content: center;
@@ -158,178 +170,185 @@
         .item-content {
             display: flex;
             flex-direction: column;
-            gap: 3px; /* Reduced gap */
+            gap: 3px;
         }
 
         .item-title {
-            font-size: 0.95rem; /* Reduced font size */
+            font-size: 0.95rem;
             font-weight: 600;
             color: #e6edf3;
             margin: 0;
         }
 
         .item-desc {
-            font-size: 0.85rem; /* Reduced font size */
+            font-size: 0.85rem;
             color: #8b949e;
             margin: 0;
             line-height: 1.4;
         }
 
-        /* Column 1 Styling (Finance/Gov) */
-        .col-left .section-header { border-bottom-color: #a371f7; }
-        .col-left .section-icon { color: #a371f7; background-color: rgba(163, 113, 247, 0.1); border-color: rgba(163, 113, 247, 0.2); }
-        .col-left .item-icon { color: #a371f7; }
+        /* Column 1 Styling (Identity) */
+        .col-left .section-header {
+            border-bottom-color: #a371f7;
+        }
 
-        /* Column 2 Styling (Infra/Logic) */
-        .col-right .section-header { border-bottom-color: #3fb950; }
-        .col-right .section-icon { color: #3fb950; background-color: rgba(63, 185, 80, 0.1); border-color: rgba(63, 185, 80, 0.2); }
-        .col-right .item-icon { color: #3fb950; }
+        .col-left .section-icon {
+            color: #a371f7;
+            background-color: rgba(163, 113, 247, 0.1);
+            border-color: rgba(163, 113, 247, 0.2);
+        }
+
+        .col-left .item-icon {
+            color: #a371f7;
+        }
+
+        /* Column 2 Styling (AI) */
+        .col-right .section-header {
+            border-bottom-color: #3fb950;
+        }
+
+        .col-right .section-icon {
+            color: #3fb950;
+            background-color: rgba(63, 185, 80, 0.1);
+            border-color: rgba(63, 185, 80, 0.2);
+        }
+
+        .col-right .item-icon {
+            color: #3fb950;
+        }
 
         .summary-box {
-            margin-top: 20px; /* Reduced margin */
-            padding: 16px; /* Reduced padding */
+            margin-top: 20px;
+            padding: 16px;
             background: rgba(48, 54, 61, 0.3);
             border-left: 4px solid #f78166;
             border-radius: 0 8px 8px 0;
         }
-        
+
         .summary-text {
-            font-size: 1.1rem; /* Slightly reduced */
+            font-size: 1.1rem;
             font-weight: 500;
             color: #ffffff;
             margin: 0;
         }
-        
-        .summary-label {
-             font-family: 'IBM Plex Mono', monospace;
-             font-size: 0.75rem; /* Reduced font size */
-             text-transform: uppercase;
-             color: #f78166;
-             margin-bottom: 4px; /* Reduced margin */
-             display: block;
-             letter-spacing: 0.05em;
-        }
 
+        .summary-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #f78166;
+            margin-bottom: 4px;
+            display: block;
+            letter-spacing: 0.05em;
+        }
     </style>
 </head>
+
 <body>
-<div class="slide-container">
-<!-- Background Decorations -->
-<div class="bg-decoration-right"></div>
-<div class="bg-decoration-left"></div>
-<div class="content-wrapper">
-<h1>What This Enables</h1>
-<p class="subtitle">Expanding the horizon of what's possible with verifiable, neutral backends.</p>
-<div class="lists-container">
-<!-- Column 1: Governance & Finance -->
-<div class="list-section col-left">
-<div class="section-header">
-<div class="section-icon">
-<i class="fa-solid fa-building-columns"></i>
-</div>
-<div>
-<p class="title-text">Governance &amp; Finance</p>
-</div>
-</div>
-<ul class="custom-list">
-<li class="list-item">
-<div class="item-icon">
-<i class="fa-solid fa-users-gear"></i>
-</div>
-<div class="item-content">
-<p class="item-title">Passkey-based DAO Governance</p>
-<p class="item-desc">Secure, high-participation voting systems using biometrics instead of complex wallets.</p>
-</div>
-</li>
-<li class="list-item">
-<div class="item-icon">
-<i class="fa-solid fa-file-invoice-dollar"></i>
-</div>
-<div class="item-content">
-<p class="item-title">Onchain Subscription Billing</p>
-<p class="item-desc">Recurring payment flows executed automatically by smart contract logic.</p>
-</div>
-</li>
-<li class="list-item">
-<div class="item-icon">
-<i class="fa-solid fa-vault"></i>
-</div>
-<div class="item-content">
-<p class="item-title">Rule-based Treasury Management</p>
-<p class="item-desc">Programmable spending limits and multi-sig policies enforced directly by the runtime.</p>
-</div>
-</li>
-</ul>
-</div>
-<!-- Column 2: Infrastructure & Logic -->
-<div class="list-section col-right">
-<div class="section-header">
-<div class="section-icon">
-<i class="fa-solid fa-network-wired"></i>
-</div>
-<div>
-<p class="title-text">Infrastructure &amp; Logic</p>
-</div>
-</div>
-<ul class="custom-list">
-<li class="list-item">
-<div class="item-icon">
-<i class="fa-solid fa-list-check"></i>
-</div>
-<div class="item-content">
-<p class="item-title">Transparent Milestone Funding</p>
-<p class="item-desc">Funds are released automatically when verifiable metrics or conditions are met.</p>
-</div>
-</li>
-<li class="list-item">
-<div class="item-icon">
-<i class="fa-solid fa-code"></i>
-</div>
-<div class="item-content">
-<p class="item-title">Public API Execution Logic</p>
-<p class="item-desc">Deterministic public endpoints that function as censorship-resistant APIs.</p>
-</div>
-</li>
-<li class="list-item">
-<div class="item-icon">
-<i class="fa-solid fa-cloud-arrow-up"></i>
-</div>
-<div class="item-content">
-<p class="item-title">Verifiable SaaS Backends</p>
-<p class="item-desc">Backend services where execution logic is transparent and auditable by anyone.</p>
-</div>
-</li>
-</ul>
-</div>
-</div>
-<!-- Bottom One-Liner -->
-<div class="summary-box">
-<span class="summary-label">Key Takeaway</span>
-<p class="summary-text">"Any backend logic that benefits from neutrality, auditability, or shared state."</p>
-</div>
-</div>
-</div>
-<!-- slide-scale -->
-<script>
-  (function () {
-    if (window.self !== window.top) return;
-    const slide = document.querySelector(".slide-container");
-    if (!slide) return;
-    const baseWidth = slide.offsetWidth || 1280;
-    const baseHeight = slide.offsetHeight || 720;
-    function applyScale() {
-      const scale = window.innerHeight / baseHeight;
-      const offsetX = (window.innerWidth - baseWidth * scale) / 2;
-      const offsetY = (window.innerHeight - baseHeight * scale) / 2;
-      slide.style.transformOrigin = "top left";
-      slide.style.transform =
-        "translate(" + offsetX + "px, " + offsetY + "px) scale(" + scale + ")";
-    }
-    window.addEventListener("resize", applyScale);
-    applyScale();
-  })();
-</script>
-
-
+    <div class="slide-container">
+        <!-- Background Decorations -->
+        <div class="bg-decoration-right"></div>
+        <div class="bg-decoration-left"></div>
+        <div class="content-wrapper">
+            <h1>More Possibilities with Stylus</h1>
+            <p class="subtitle">Expanding the horizon of what's possible with the machine of trust</p>
+            <div class="lists-container">
+                <!-- Column 1: Identity & Payments -->
+                <div class="list-section col-left">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fa-solid fa-id-card-clip"></i>
+                        </div>
+                        <div>
+                            <p class="title-text">Identity &amp; Payments</p>
+                            <span class="title-sub">Build trust between humans</span>
+                        </div>
+                    </div>
+                    <ul class="custom-list">
+                        <li class="list-item">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-passport"></i>
+                            </div>
+                            <div class="item-content">
+                                <p class="item-title">Decentralized Identity</p>
+                                <p class="item-desc">Self-sovereign profiles and credentials verified directly onchain.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="list-item">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-hand-holding-dollar"></i>
+                            </div>
+                            <div class="item-content">
+                                <p class="item-title">Marketplace Escrow</p>
+                                <p class="item-desc">Secure, trustless asset exchange between mutually untrusted
+                                    parties.</p>
+                            </div>
+                        </li>
+                        <li class="list-item">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                            </div>
+                            <div class="item-content">
+                                <p class="item-title">Dispute Resolution</p>
+                                <p class="item-desc">Transparent onchain arbitration mechanisms for conflicting claims.
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Column 2: AI-Native Contracts -->
+                <div class="list-section col-right">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div>
+                            <p class="title-text">AI-Native Contracts</p>
+                            <span class="title-sub">Build trust for autonomous AI agents</span>
+                        </div>
+                    </div>
+                    <ul class="custom-list">
+                        <li class="list-item">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <div class="item-content">
+                                <p class="item-title">AI Agent Wallet</p>
+                                <p class="item-desc">Autonomous transaction signing capabilities for AI inference
+                                    models.</p>
+                            </div>
+                        </li>
+                        <li class="list-item">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <div class="item-content">
+                                <p class="item-title">AI Strategy Execution Vault</p>
+                                <p class="item-desc">Secure fund management driven by off-chain AI logic and strategy.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="list-item">
+                            <div class="item-icon">
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            </div>
+                            <div class="item-content">
+                                <p class="item-title">Reputation Scoring Engine</p>
+                                <p class="item-desc">Dynamic trust scoring calculated from complex onchain behavioral
+                                    data.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Bottom One-Liner -->
+            <div class="summary-box">
+                <span class="summary-label">Your North Star</span>
+                <p class="summary-text">"If trust is the bottleneck, Stylus is worth trying."</p>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>

@@ -124,7 +124,7 @@
     <header>
       <button id="prev-btn" type="button">Prev</button>
       <button id="next-btn" type="button">Next</button>
-      <span id="page-indicator">1 / 16</span>
+      <span id="page-indicator">1 / 15</span>
       <input id="page-input" type="number" min="1" step="1" />
       <button id="go-btn" type="button">Go</button>
       <button id="scale-btn" type="button">Scale: Fit Height</button>
@@ -141,7 +141,23 @@
   </div>
 
   <script>
-    const SLIDES = Array.from({ length: 16 }, (_, i) => `${i + 1}.html`);
+    const SLIDES = [
+      "1.html",
+      "2.html",
+      "4.html",
+      "5.html",
+      "6.html",
+      "7.html",
+      "8.html",
+      "9.html",
+      "10.html",
+      "11.html",
+      "12.html",
+      "13.html",
+      "14.html",
+      "15.html",
+      "16.html"
+    ];
     const frame = document.getElementById('slide-frame');
     const wrap = document.getElementById('frame-wrap');
     const prevBtn = document.getElementById('prev-btn');

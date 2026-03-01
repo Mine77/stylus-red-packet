@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>What Are Smart Contracts?</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&amp;family=IBM+Plex+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
-<style>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>What Are Smart Contracts?</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #0d1117; /* GitHub Dark Dimmed */
+            background-color: #0d1117;
+            /* GitHub Dark Dimmed */
             color: #c9d1d9;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
@@ -26,11 +30,11 @@
             position: relative;
             background-color: #0d1117;
             overflow: hidden;
-            padding: 60px 80px;
+            padding: 50px 80px;
             box-sizing: border-box;
         }
 
-        /* Subtle background decoration (SVG pattern instead of gradient) */
+        /* Subtle background decoration */
         .bg-decoration {
             position: absolute;
             top: 0;
@@ -42,77 +46,113 @@
             background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm1 1h38v38H1V1z' fill='%23ffffff' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
 
-        .content-wrapper {
-            position: relative;
+        /* Main Content Area - adjusted to center vertically without header */
+        .main-content {
+            flex: 1;
             z-index: 10;
             display: flex;
             flex-direction: column;
-            height: 100%;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            /* Added slightly more vertical padding since header is gone to keep visual balance */
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
 
-        h1 {
+        /* Definition Headline */
+        .headline-container {
+            text-align: center;
+        }
+
+        .headline-prefix {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.5rem;
+            color: #8b949e;
+            margin-bottom: 10px;
+        }
+
+        .headline-main {
             font-size: 3.5rem;
             font-weight: 800;
             color: #ffffff;
-            margin-bottom: 30px;
-            letter-spacing: -0.02em;
-            border-left: 6px solid #28a0f0; /* Arbitrum Blue */
-            padding-left: 24px;
-            line-height: 1;
+            line-height: 1.1;
+            text-shadow: 0 0 30px rgba(40, 160, 240, 0.2);
         }
 
-        .comparison-container {
+        .headline-highlight {
+            color: #28a0f0;
+            /* Arbitrum Blue */
+            position: relative;
+            display: inline-block;
+        }
+
+        .headline-highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: #28a0f0;
+            opacity: 0.3;
+            border-radius: 2px;
+        }
+
+        /* Content Grid */
+        .grid-container {
             display: flex;
-            gap: 40px;
-            flex: 1;
-            margin-bottom: 30px;
+            width: 100%;
+            gap: 30px;
+            justify-content: center;
         }
 
-        .card {
-            flex: 1;
-            background-color: #161b22; /* Card bg */
+        .info-card {
+            background-color: #161b22;
             border: 1px solid #30363d;
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 30px;
+            flex: 1;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .info-card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        /* Specific card styling */
+        .system-card {
+            border-top: 4px solid #28a0f0;
+            /* Blue top border */
+        }
+
+        .verify-card {
+            border-top: 4px solid #3fb950;
+            /* Green top border */
         }
 
         .card-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 24px;
-            border-bottom: 1px solid #30363d;
-            padding-bottom: 16px;
-        }
-
-        .card-icon {
-            font-size: 1.5rem;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-
-        .traditional-icon {
-            background-color: rgba(139, 148, 158, 0.1);
-            color: #8b949e;
-        }
-
-        .verifiable-icon {
-            background-color: rgba(40, 160, 240, 0.1);
-            color: #28a0f0;
-        }
-
-        .card-title {
-            font-size: 1.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #ffffff;
-            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #30363d;
+        }
+
+        .system-header {
+            color: #58a6ff;
+        }
+
+        .verify-header {
+            color: #3fb950;
         }
 
         .feature-list {
@@ -126,162 +166,145 @@
 
         .feature-item {
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
+            align-items: center;
+            gap: 15px;
             font-size: 1.1rem;
-            line-height: 1.4;
             color: #c9d1d9;
+            font-weight: 500;
         }
 
-        .feature-item i {
-            margin-top: 4px;
-            font-size: 0.9em;
-        }
-
-        .bullet-dim { color: #484f58; }
-        .bullet-highlight { color: #28a0f0; }
-        .bullet-warn { color: #e43717; }
-
-        .summary-section {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            padding: 24px 32px;
+        .icon-box {
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-        }
-
-        .summary-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin: 0;
-        }
-
-        .callout-box {
-            background-color: rgba(228, 55, 23, 0.1); /* Rust tint */
-            border: 1px solid rgba(228, 55, 23, 0.3);
+            justify-content: center;
             border-radius: 8px;
-            padding: 12px 24px;
+            flex-shrink: 0;
+        }
+
+        .system-icon {
+            background-color: rgba(40, 160, 240, 0.1);
+            color: #28a0f0;
+        }
+
+        .verify-icon {
+            background-color: rgba(63, 185, 80, 0.1);
+            color: #3fb950;
+        }
+
+        /* Footer Summary */
+        .footer-summary {
+            z-index: 10;
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #30363d;
+        }
+
+        .insight-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 24px;
+            border-radius: 50px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .insight-negative {
+            border-color: rgba(248, 81, 73, 0.3);
             color: #ff7b72;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
-        /* Highlighting the verifiable card slightly more */
-        .card.verifiable {
-            border-color: rgba(40, 160, 240, 0.4);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        .insight-positive {
+            border-color: rgba(63, 185, 80, 0.3);
+            color: #7ee787;
+            background-color: rgba(63, 185, 80, 0.05);
         }
 
+        .insight-pill i {
+            font-size: 1.1rem;
+        }
     </style>
 </head>
+
 <body>
-<div class="slide-container">
-<div class="bg-decoration"></div>
-<div class="content-wrapper">
-<h1>What Are Smart Contracts?</h1>
-<div class="comparison-container">
-<!-- Traditional Backend -->
-<div class="card">
-<div class="card-header">
-<div class="card-icon traditional-icon">
-<i class="fa-solid fa-server"></i>
-</div>
-<p class="card-title">Traditional Backend</p>
-</div>
-<ul class="feature-list">
-<li class="feature-item">
-<i class="fa-solid fa-user-gear bullet-dim"></i>
-<p>Controlled by one operator</p>
-</li>
-<li class="feature-item">
-<i class="fa-solid fa-eye-slash bullet-dim"></i>
-<p>Execution not externally verifiable</p>
-</li>
-<li class="feature-item">
-<i class="fa-solid fa-database bullet-dim"></i>
-<p>State stored in private database</p>
-</li>
-<li class="feature-item">
-<i class="fa-solid fa-handshake-simple bullet-dim"></i>
-<p>Trust-based guarantees</p>
-</li>
-<li class="feature-item">
-<i class="fa-solid fa-pen-to-square bullet-warn"></i>
-<p>Operator can modify rules</p>
-</li>
-</ul>
-</div>
-<!-- Verifiable Execution -->
-<div class="card verifiable">
-<div class="card-header">
-<div class="card-icon verifiable-icon">
-<i class="fa-brands fa-ethereum"></i>
-</div>
-<p class="card-title">A Verifiable Execution Environment</p>
-</div>
-<ul class="feature-list">
-<li class="feature-item">
-<i class="fa-solid fa-calculator bullet-highlight"></i>
-<p>Deterministic execution</p>
-</li>
-<li class="feature-item">
-<i class="fa-solid fa-globe bullet-highlight"></i>
-<p>Public state transitions</p>
-</li>
-<li class="feature-item">
-<i class="fa-solid fa-key bullet-highlight"></i>
-<p>Cryptographically verifiable</p>
-</li>
-<li class="feature-item">
-<i class="fa-solid fa-scale-balanced bullet-highlight"></i>
-<p>Economically enforced rules</p>
-</li>
-<li class="feature-item">
-<i class="fa-solid fa-shield-halved bullet-highlight"></i>
-<p>No unilateral rule changes</p>
-</li>
-</ul>
-</div>
-</div>
-<!-- Summary Footer -->
-<div class="summary-section">
-<p class="summary-text">
-                    Same business logic. <span style="color: #28a0f0;">Different trust assumptions.</span>
-</p>
-<div class="callout-box">
-<i class="fa-solid fa-triangle-exclamation"></i>
-<p>Smart contracts ≠ tokens. Smart contracts = execution model.</p>
-</div>
-</div>
-</div>
-</div>
-<!-- slide-scale -->
-<script>
-  (function () {
-    if (window.self !== window.top) return;
-    const slide = document.querySelector(".slide-container");
-    if (!slide) return;
-    const baseWidth = slide.offsetWidth || 1280;
-    const baseHeight = slide.offsetHeight || 720;
-    function applyScale() {
-      const scale = window.innerHeight / baseHeight;
-      const offsetX = (window.innerWidth - baseWidth * scale) / 2;
-      const offsetY = (window.innerHeight - baseHeight * scale) / 2;
-      slide.style.transformOrigin = "top left";
-      slide.style.transform =
-        "translate(" + offsetX + "px, " + offsetY + "px) scale(" + scale + ")";
-    }
-    window.addEventListener("resize", applyScale);
-    applyScale();
-  })();
-</script>
-
-
+    <div class="slide-container">
+        <div class="bg-decoration"></div>
+        <!-- Header Removed as requested -->
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Headline -->
+            <div class="headline-container">
+                <p class="headline-prefix">What are smart contracts?</p>
+                <p class="headline-main">A <span class="headline-highlight">Verifiable Execution</span> Environment</p>
+            </div>
+            <!-- Two Column Grid -->
+            <div class="grid-container">
+                <!-- System Properties -->
+                <div class="info-card system-card">
+                    <p class="card-header system-header">
+                        <i class="fa-solid fa-server" style="margin-right: 8px;"></i> A Runtime Where...
+                    </p>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="icon-box system-icon"><i class="fa-solid fa-calculator"></i></div>
+                            <p>Execution is Deterministic</p>
+                        </li>
+                        <li class="feature-item">
+                            <div class="icon-box system-icon"><i class="fa-solid fa-network-wired"></i></div>
+                            <p>State transitions are secured by cryptographic</p>
+                        </li>
+                        <li class="feature-item">
+                            <div class="icon-box system-icon"><i class="fa-solid fa-check-double"></i></div>
+                            <p>Results are independently verifiable</p>
+                        </li>
+                        <li class="feature-item">
+                            <div class="icon-box system-icon"><i class="fa-solid fa-user-shield"></i></div>
+                            <p>No trusted operator is required</p>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Verification Capabilities -->
+                <div class="info-card verify-card">
+                    <p class="card-header verify-header">
+                        <i class="fa-solid fa-magnifying-glass" style="margin-right: 8px;"></i> Anyone Can Verify...
+                    </p>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="icon-box verify-icon"><i class="fa-solid fa-code"></i></div>
+                            <p>What code ran</p>
+                        </li>
+                        <li class="feature-item">
+                            <div class="icon-box verify-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
+                            <p>What inputs were provided</p>
+                        </li>
+                        <li class="feature-item">
+                            <div class="icon-box verify-icon"><i class="fa-solid fa-database"></i></div>
+                            <p>What state changed</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Footer Summary -->
+        <div class="footer-summary">
+            <div class="insight-pill insight-negative">
+                <i class="fa-solid fa-xmark"></i>
+                <p>Smart contracts ≠ useless tokens</p>
+            </div>
+            <div class="insight-pill insight-positive">
+                <i class="fa-solid fa-check"></i>
+                <p>Smart contracts = No Central Server Trust</p>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>
